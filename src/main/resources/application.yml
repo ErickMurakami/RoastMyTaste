@@ -13,17 +13,17 @@ spring:
       base-url: https://api.groq.com/openai/v1
       chat:
         options:
-          model: llama-3.3-70b-versatile
+          model: openai/gpt-oss-120b
           temperature: 0.7
   security:
     oauth2:
       client:
         registration:
           spotify:
-            client-id: "${SPOTIFY_CLIENT_ID}"
-            client-secret: "${SPOTIFY_SECRET}"
+            client-id: ${SPOTIFY_CLIENT_ID}
+            client-secret: ${SPOTIFY_SECRET}
             authorization-grant-type: authorization_code
-            redirect-uri: "${SPOTIFY_REDIRECT_URI:http://127.0.0.1:8080/login/oauth2/code/spotify}"
+            redirect-uri: ${SPOTIFY_REDIRECT_URI:http://127.0.0.1:8080/login/oauth2/code/spotify}
             scope:
               - user-top-read
         provider:
@@ -40,21 +40,14 @@ spotify:
   api:
     base-url: https://api.spotify.com/v1
 
-jwt:
-  secret: ${JWT_SECRET:umaChaveMuitoLongaESeguraComPeloMenos32Caracteres123456}
-  expiration: 86400000 # 24 horas em milissegundos
-
-app:
-  frontend-url: ${FRONTEND_URL:https://roast-my-taste-demo.vercel.app}
-
 server:
   forward-headers-strategy: framework
   servlet:
     session:
       cookie:
         path: /
-        same-site: none
-        secure: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
         http-only: true
 
 logging:

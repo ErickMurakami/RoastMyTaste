@@ -1,8 +1,8 @@
 package dev.erick.roastmytaste.interfaces.rest;
 
-import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
+import org.springframework.security.oauth2.client.annotation.RegisteredOAuth2AuthorizedClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 
@@ -11,48 +11,30 @@ import java.util.Map;
 @RestController
 public class AuthDebugController {
 
-    private final RestClient spotifyRestClient = RestClient.create("https://api.spotify.com/v1");
+    private final RestClient spotifyRestClient =
+            RestClient.create("https://api.spotify.com/v1");
 
     @GetMapping("/api/v1/me")
     public Map<String, Object> me(
-            @RequestHeader(value = "Authorization", required = false) String authHeader,
-            @CookieValue(value = "spotify_token", required = false) String cookieToken) {
+            @RegisteredOAuth2AuthorizedClient("spotify") OAuth2AuthorizedClient client) {
 
-        String token = extractToken(authHeader, cookieToken);
+        @SuppressWarnings("unchecked")
+        Map<String, Object> spotifyUser = spotifyRestClient.get()
+                .uri("/me")
+                .headers(headers -> headers.setBearerAuth(
+                        client.getAccessToken().getTokenValue()
+                ))
+                .retrieve()
+                .body(Map.class);
 
-        if (token == null) {
-            return Map.of("authenticated", false);
+        if (spotifyUser == null) {
+            throw new IllegalStateException("Spotify returned an empty profile");
         }
 
-        try {
-            Map<String, Object> spotifyUser = spotifyRestClient.get()
-                    .uri("/me")
-                    .header("Authorization", "Bearer " + token)
-                    .retrieve()
-                    .body(Map.class);
-
-            if (spotifyUser == null) {
-                return Map.of("authenticated", false);
-            }
-
-            return Map.of(
-                    "authenticated", true,
-                    "name", spotifyUser.get("id"),
-                    "authorities", Map.of("attributes", spotifyUser)
-            );
-
-        } catch (Exception e) {
-            return Map.of("authenticated", false);
-        }
+        return Map.of(
+                "authenticated", true,
+                "name", String.valueOf(spotifyUser.getOrDefault("id", "")),
+                "authorities", Map.of("attributes", spotifyUser)
+        );
     }
-    private String extractToken(String authHeader, String cookieToken) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
-        if (cookieToken != null && !cookieToken.isBlank()) {
-            return cookieToken;
-        }
-        return null;
-    }
-
 }
