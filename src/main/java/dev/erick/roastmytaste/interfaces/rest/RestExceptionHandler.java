@@ -7,11 +7,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
 @RestControllerAdvice
 public class RestExceptionHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
 
     @ExceptionHandler(InsufficientDataException.class)
     public ResponseEntity<ApiError> handleInsufficientData(InsufficientDataException ex) {
@@ -27,6 +31,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(AiAnalysisException.class)
     public ResponseEntity<ApiError> handleAiAnalysisException(AiAnalysisException ex) {
+        LOG.error("AI analysis failed", ex);
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(ApiError.of("AI_ANALYSIS_ERROR", "The AI provider failed to generate a valid roast analysis."));
     }
