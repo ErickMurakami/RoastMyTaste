@@ -12,9 +12,10 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 public class SpotifyClientConfig {
     @Bean
     RestClient spotifyRestClient(
-            @Value("${spotify.api.base-url}") String baseUrl
+            @Value("${spotify.api.base-url}") String baseUrl,
+            RestClient.Builder builder
     ) {
-        return RestClient.builder()
+        return builder
                 .baseUrl(baseUrl).build();
     }
 

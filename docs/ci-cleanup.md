@@ -1,42 +1,35 @@
-# GitHub-native CI cleanup
+# CI pipeline migration
 
-## Findings
+## Problem
 
-The only original workflow, `.github/workflows/deploy.yml`, ran on pushes to `main`. It:
+The previous `.github/workflows/deploy.yml` combined compilation, container publishing, and remote deployment. It ran only on pushes to `main` and built with `./gradlew build -x test`, bypassing the application context integrity test and all other automated tests.
 
-1. Built with `./gradlew build -x test`, bypassing the default integrity test.
-2. Logged in to GHCR and published a Docker image with package write permission.
-3. Used `appleboy/ssh-action@v1.0.3` and `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, and `SSH_PASSPHRASE` secrets to connect to a server labelled “Droplet”.
-4. Wrote a Compose file and executed Podman deployment commands there.
+The workflow published an image to GHCR, then used `appleboy/ssh-action@v1.0.3` to connect to a server labelled “Droplet”. It generated a Compose configuration and executed Podman deployment commands. This required package write permission and the `SSH_HOST`, `SSH_USER`, `SSH_PRIVATE_KEY`, and `SSH_PASSPHRASE` secrets.
 
-That SSH deployment was the only tracked action that contacted an external deployment server. The hostname came from a GitHub secret, so its destination cannot be determined from repository code. There was no explicit DeepOcean/VCS URL, mirror, credential, or build hook in the tracked workflows, Gradle build/settings/wrapper, environment example, Dockerfile, or documentation. No repository `gradle.properties`, init scripts, or additional CI scripts were present. No local Gradle init configuration was found either.
+The SSH step was the repository's explicit connection to an external deployment host. Its destination was supplied by a secret, so the hostname cannot be determined from the workflow. There is no explicit DeepOcean/VCS URL, mirror, or integration in the repository's Gradle configuration or workflows. A similarly named external status check could also originate from a GitHub App, webhook, or external CI project.
 
-The evidence establishes the obsolete SSH deployment path; it does **not** establish that this was a service specifically called DeepOcean VCS. An externally installed check or webhook cannot be removed by editing a workflow.
+## Decision
 
-## Changes
+Build verification is independent of deployment. The single `ci.yml` workflow checks out the GitHub repository, configures Temurin 25 and the Gradle wrapper, then runs:
 
-Replaced the deployment workflow with a single `.github/workflows/ci.yml`:
+```bash
+./gradlew clean build --no-daemon --console=plain
+```
 
-- Push and pull request triggers targeting `main`, plus `workflow_dispatch`.
-- Current repository checkout with persisted Git credentials disabled.
-- Temurin Java 25 and official Gradle setup with wrapper validation/cache.
-- `./gradlew clean build --no-daemon --console=plain`: standard compilation, integrity/regression tests, and packaging. No test exclusions or custom deployment command.
-- Only `contents: read`; PR cache access is read-only.
-- A 15-minute job timeout and cancellation of superseded runs.
-- No Docker login, package publishing, SSH steps, production credentials, or deployment.
+This executes compilation, the default integrity test, regression tests, and packaging. Compilation or test failures fail the job. It requires no Spotify or Groq production credentials.
 
-The wrapper remains on Gradle 9.4.1 and Maven Central remains the dependency repository. GitHub repository secrets have not been read, deleted, or modified.
+The workflow runs on pushes and pull requests targeting `main`, plus manual dispatch. Repository permissions are limited to `contents: read`; checkout does not persist credentials, and pull requests use read-only caches. Superseded runs are cancelled, and jobs have a 15-minute timeout.
 
-Official action references: [checkout](https://github.com/actions/checkout), [setup-java](https://github.com/actions/setup-java), and [Gradle actions](https://github.com/gradle/actions).
+Gradle remains at 9.4.1 with Maven Central dependencies. Official [checkout](https://github.com/actions/checkout), [Java setup](https://github.com/actions/setup-java), and [Gradle setup](https://github.com/gradle/actions) actions provide repository checkout, JDK installation, wrapper validation, and caching. CI no longer publishes images or performs SSH deployment.
 
-## Manual action if the old check still appears
+## External integration retirement
 
-These settings were not accessible through the local checkout, so their state is unverified. Only remove a setting when it identifies the obsolete service.
+Repository configuration cannot remove installed GitHub integrations or required status checks. If an obsolete DeepOcean/VCS check continues to appear, the repository administrator should identify its source and remove the corresponding configuration:
 
-1. Open [repository Webhooks](https://github.com/Erickkamii/SpotifyRoaster/settings/hooks). Disable/delete the hook whose payload URL targets the obsolete DeepOcean/VCS endpoint.
-2. Open repository **Settings → Integrations → GitHub Apps**. Configure the obsolete app's installation and remove this repository from its access, or uninstall it if it is no longer used elsewhere. For OAuth app integrations, use account **Settings → Applications → Authorized OAuth Apps** to revoke the obsolete application's access.
-3. Open [Rulesets](https://github.com/Erickkamii/SpotifyRoaster/settings/rules) and [Branches](https://github.com/Erickkamii/SpotifyRoaster/settings/branches). Remove any required status check belonging to that obsolete service. After the new workflow has run, select `Build and test (Java 25)` as the GitHub-native required check if desired.
-4. If there is a corresponding external CI project/repository integration, disconnect this repository in that service as well.
-5. The `SSH_*` secrets are no longer referenced by CI. Review/remove them manually only if no other workflow or deployment uses them. No secret changes were attempted through code.
+1. In [Webhooks](https://github.com/Erickkamii/SpotifyRoaster/settings/hooks), disable or delete the hook targeting the obsolete service's payload URL.
+2. In **Settings → Integrations → GitHub Apps**, remove this repository from the obsolete app's installation. Uninstall the app only if no other repository uses it. OAuth app access is managed through account **Settings → Applications → Authorized OAuth Apps**.
+3. In [Rulesets](https://github.com/Erickkamii/SpotifyRoaster/settings/rules) and [Branches](https://github.com/Erickkamii/SpotifyRoaster/settings/branches), replace the obsolete required status check with `Build and test (Java 25)` after that check has appeared in an Actions run.
+4. Disconnect the repository from the obsolete external CI project, if one exists.
+5. Review the unused `SSH_*` secrets under repository Actions settings. Remove them only when no other deployment depends on them.
 
-A GitHub-hosted Actions pass must be confirmed from an actual run after pushing; local Gradle success alone is not such confirmation.
+Remove integrations only after matching them to the obsolete service. Workflow changes do not modify GitHub settings or secrets. GitHub-hosted execution must be confirmed in Actions after pushing the updated workflow.

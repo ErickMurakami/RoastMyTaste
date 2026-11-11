@@ -4,6 +4,8 @@ import dev.erick.roastmytaste.domain.exception.AiAnalysisException;
 import dev.erick.roastmytaste.domain.exception.InsufficientDataException;
 import dev.erick.roastmytaste.domain.exception.SpotifyProviderException;
 import org.springframework.http.HttpStatus;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -12,7 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackageClasses = SpotifyAnalyzisDebugController.class)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class RestExceptionHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestExceptionHandler.class);
@@ -31,7 +34,7 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(AiAnalysisException.class)
     public ResponseEntity<ApiError> handleAiAnalysisException(AiAnalysisException ex) {
-        LOG.error("AI analysis failed", ex);
+        LOG.warn("AI analysis failed ({})", ex.getClass().getSimpleName());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
                 .body(ApiError.of("AI_ANALYSIS_ERROR", "The AI provider failed to generate a valid roast analysis."));
     }

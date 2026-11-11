@@ -31,7 +31,8 @@ public record SpotifyTrackResponse(
                 artistsName,
                 durationMs,
                 explicit,
-                releaseDate
+                releaseDate,
+                album == null ? null : SpotifyImageResponse.firstUrl(album.images())
         );
     }
 
@@ -44,6 +45,7 @@ public record SpotifyTrackResponse(
     public record SpotifyAlbumSummaryResponse(
             String id,
             @JsonProperty("release_date")
-            String releaseDate
+            String releaseDate,
+            List<SpotifyImageResponse> images
     ){}
 }

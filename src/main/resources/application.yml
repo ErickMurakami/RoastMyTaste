@@ -9,10 +9,17 @@ spring:
     virtual:
       enabled: true
 
+  http:
+    clients:
+      connect-timeout: 5s
+      read-timeout: 25s
+
   ai:
     openai:
       api-key: ${GROQ_API_KEY}
       base-url: https://api.groq.com/openai/v1
+      timeout: 40s
+      max-retries: 0
       chat:
         options:
           model: openai/gpt-oss-120b
@@ -46,6 +53,10 @@ spotify:
     base-url: https://api.spotify.com/v1
 
 server:
+  error:
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
   forward-headers-strategy: framework
   servlet:
     session:

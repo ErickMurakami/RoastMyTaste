@@ -7,9 +7,10 @@ import java.util.List;
 public record SpotifyArtistsResponse(
         String id,
         String name,
-        List<String> genres
+        List<String> genres,
+        List<SpotifyImageResponse> images
 ) {
     public Artist toDomain(){
-        return new Artist(id, name, genres);
+        return new Artist(id, name, genres, SpotifyImageResponse.firstUrl(images));
     }
 }

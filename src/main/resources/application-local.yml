@@ -1,0 +1,21 @@
+# Only the AI is faked. Spotify OAuth and listening data still use Spotify.
+spring:
+  ai:
+    chat:
+      client:
+        enabled: false
+    model:
+      chat: none
+      embedding: none
+      image: none
+      moderation: none
+      audio:
+        speech: none
+        transcription: none
+  security:
+    oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: ${SPOTIFY_CLIENT_ID:local-preview}
+            client-secret: ${SPOTIFY_SECRET:local-preview}

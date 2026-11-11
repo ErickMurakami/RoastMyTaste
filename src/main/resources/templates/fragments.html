@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<a th:fragment="brand" class="brand" th:href="@{/}" aria-label="RoastMyTaste home">
+    <span class="brand-mark" aria-hidden="true">r<span>✳</span></span>
+    <span>roast<span class="brand-light">my</span>taste<span class="brand-dot">.</span></span>
+</a>
+<svg th:fragment="spotify" class="spotify-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="12" fill="currentColor"/>
+    <path d="M5.1 8.8c4.5-1.3 9.3-.9 13.8 1.4M6 12.1c3.8-1 7.8-.6 11.5 1.3M6.8 15.3c3.2-.7 6.4-.4 9.4 1.1" fill="none" stroke="var(--spotify-cutout, #111310)" stroke-width="1.7" stroke-linecap="round"/>
+</svg>
+<footer th:fragment="footer" class="site-footer shell">
+    <p>Made for the plot. Powered by <a href="https://www.spotify.com/" class="spotify-credit"><svg th:replace="~{fragments :: spotify}"></svg> Spotify</a>.</p>
+    <a href="https://github.com/Erickkamii/SpotifyRoaster" target="_blank" rel="noopener noreferrer">Built with questionable taste <span aria-hidden="true">↗</span><span class="sr-only"> — GitHub (opens in a new tab)</span></a>
+</footer>
+</body>
+</html>

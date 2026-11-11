@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Your Spotify has receipts. Get a personalised AI comedy roast of your music taste in four languages.">
+    <meta name="theme-color" content="#111310">
+    <title>RoastMyTaste — Your music taste is a crime.</title>
+    <link rel="icon" type="image/svg+xml" th:href="@{/favicon.svg}">
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="site-header shell">
+    <a th:replace="~{fragments :: brand}"></a>
+    <nav aria-label="Main navigation">
+        <a class="nav-link" href="#how-it-works">How it works</a>
+        <a class="button button-small button-outline" th:href="${connected} ? @{/roast} : @{/oauth2/authorization/spotify}"><span th:text="${connected} ? 'Your roast room' : 'Face the music'">Face the music</span> <span aria-hidden="true">↗</span></a>
+    </nav>
+</header>
+<main id="main">
+    <div class="shell login-error notice" role="alert" th:if="${param.loginError != null}">
+        Spotify login did not finish. Try connecting again when you are ready.
+    </div>
+    <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+            <p class="eyebrow"><span class="status-dot"></span> YOUR PLAYLIST. UNDER INVESTIGATION.</p>
+            <h1 id="hero-title">Your music<br>taste is a <span class="crime-word">crime<svg viewBox="0 0 320 20" preserveAspectRatio="none" aria-hidden="true"><path d="M3 12Q145-3 313 7M15 18Q173 5 299 13"/></svg></span><span class="green">.</span></h1>
+            <p class="hero-description">You hit play. We press charges.<br>Connect your Spotify and let our AI critic turn your listening habits into a deeply personal comedy special.</p>
+            <a class="button button-primary hero-cta" th:href="${connected} ? @{/roast} : @{/oauth2/authorization/spotify}"><svg th:replace="~{fragments :: spotify}"></svg><span th:text="${connected} ? 'Enter the roast room' : 'Connect with Spotify'">Connect with Spotify</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+            <p class="cta-note">Just your top tracks &amp; artists. Just for a laugh.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+            <div class="orbit-label">SIDE A / THE EVIDENCE</div>
+            <div class="record"><div class="record-label"><span>ROAST<br>MY TASTE</span><small>33⅓ RPM · NO SKIPS, NO MERCY</small><i></i></div></div>
+            <div class="evidence-sticker">EXPLICIT<br><strong>QUESTIONABLE</strong><br>MUSIC TASTE</div>
+            <div class="receipt"><span class="receipt-head">LISTENING REPORT <span>↗</span></span><div class="receipt-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="receipt-row"><span>Vibes detected</span><strong>Concerning.</strong></div><div class="receipt-row"><span>Verdict</span><strong>GUILTY AS CHARGED</strong></div></div>
+            <span class="art-spark">✳</span>
+        </div>
+    </section>
+    <div class="ticker" aria-hidden="true">
+        <div class="ticker-track">
+            <div class="ticker-group" th:each="copy : ${#numbers.sequence(1, 2)}">
+                <span>GOOD MUSIC. BAD DECISIONS.</span><span>✳</span>
+                <span>YOUR ALGORITHM CAN'T SAVE YOU.</span><span>✳</span>
+                <span>GOOD MUSIC. BAD DECISIONS.</span><span>✳</span>
+                <span>YOUR ALGORITHM CAN'T SAVE YOU.</span><span>✳</span>
+            </div>
+        </div>
+    </div>
+    <section class="how-section shell" id="how-it-works" aria-labelledby="how-title">
+        <div class="section-heading"><div><p class="eyebrow">THE PROCESS</p><h2 id="how-title">Three steps to<br>emotional damage.</h2></div><p>No music degree required.<br>A sense of humour? Recommended.</p></div>
+        <div class="steps">
+            <article class="step"><span class="step-number">01 / CONNECT</span><span class="step-symbol" aria-hidden="true">↗</span><h3>Hand over the aux.</h3><p>Sign in with Spotify. We read your top tracks and artists. The evidence speaks for itself.</p></article>
+            <article class="step"><span class="step-number">02 / GET JUDGED</span><span class="step-symbol" aria-hidden="true">✳</span><h3>Meet your music critic.</h3><p>Pick your language. Our AI finds the patterns, the guilty pleasures, and the questionable choices.</p></article>
+            <article class="step"><span class="step-number">03 / TAKE THE HIT</span><span class="step-symbol" aria-hidden="true">↙</span><h3>Laugh. Cope. Repeat.</h3><p>Get your musical diagnosis, a chaos score, and some very unsolicited advice. Ready for another round?</p></article>
+        </div>
+    </section>
+    <section class="last-word shell" aria-labelledby="last-title"><span aria-hidden="true">✳</span><div><p class="eyebrow">IT'S ALL IN GOOD FUN</p><h2 id="last-title">Great taste is subjective.<br>Yours is just very funny.</h2><p>This is AI-generated comedy about music. Don't take it to heart.</p></div><a class="text-link" th:href="${connected} ? @{/roast} : @{/oauth2/authorization/spotify}">I can take it <span aria-hidden="true">↗</span></a></section>
+</main>
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

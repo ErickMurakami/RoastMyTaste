@@ -9,8 +9,13 @@ public record Track(
         List<String> artistsNames,
         int duration,
         boolean explicit,
-        String releaseDate
+        String releaseDate,
+        String imageUrl
 ) {
+    public Track(String id, String name, List<String> artistsNames, int duration, boolean explicit, String releaseDate) {
+        this(id, name, artistsNames, duration, explicit, releaseDate, null);
+    }
+
     public Track{
         Objects.requireNonNull(id, "Track ID is required");
         Objects.requireNonNull(name, "Track name is required");

@@ -1,0 +1,5 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Intermission — RoastMyTaste</title><link rel="icon" th:href="@{/favicon.svg}"><link rel="stylesheet" th:href="@{/css/app.css}"></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header shell"><a th:replace="~{fragments :: brand}"></a></header><main class="shell error-page" id="main"><p class="eyebrow">AN UNSCHEDULED INTERMISSION</p><h1>That hit a<br>wrong note<span class="green">.</span></h1><p th:text="${status == 403} ? 'Your session may have expired. Head back to the roast room and try again.' : 'We could not finish that request. Let’s get you back to the music.'">Let’s get you back to the music.</p><a class="button button-primary" th:href="@{/roast}">Back to the roast room <span aria-hidden="true">↗</span></a><a class="text-link" th:href="@{/}">Home</a></main><footer th:replace="~{fragments :: footer}"></footer></body>
+</html>
